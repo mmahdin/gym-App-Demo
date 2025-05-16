@@ -1,0 +1,104 @@
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout
+from PySide6.QtCore import Qt, Signal
+from first_page.regions import ClickableRegions
+from first_page.controller import FirstPageController
+from PySide6.QtGui import QIcon
+from PySide6.QtCore import QSize
+from first_page.history_page.history_window import HistoryPage
+
+
+class FirstPageView(QWidget):
+    exit_requested = Signal()
+
+    def __init__(self):
+        super().__init__()
+        self.controller = FirstPageController(self)
+        self.history_page = None
+        self._init_ui()
+
+    def _init_ui(self):
+        # Image label
+        # Assuming ClickableRegions is a QLabel subclass
+        self.image_label = ClickableRegions()
+        self.image_label.setAlignment(Qt.AlignCenter)
+        self.image_label.setPixmap(
+            self.controller.pixmap1)  # Set initial image
+        self.image_label.setParent(self)
+        self.image_label.move(70, 30)
+
+        # Special button setup
+        self.change_btn = QPushButton(self)
+        self.change_btn.setIcon(
+            QIcon('/home/mahdi/Documents/sensor/ux/first_page/images/rotp.png'))
+        self.change_btn.setStyleSheet(change_btn)
+        self.change_btn.move(10, 450)
+        self.change_btn.clicked.connect(self.toggle_image)
+
+        self.hist_btn = QPushButton(self)
+        self.hist_btn.setIcon(
+            QIcon('/home/mahdi/Documents/sensor/ux/first_page/images/hist.png'))
+        self.hist_btn.setStyleSheet(hist_btn)
+        self.hist_btn.move(120, 700)
+        self.hist_btn.clicked.connect(self.show_history_page)
+
+        self.plan_btn = QPushButton(self)
+        self.plan_btn.setIcon(
+            QIcon('/home/mahdi/Documents/sensor/ux/first_page/images/plan.png'))
+        self.plan_btn.setStyleSheet(plan_btn)
+        self.plan_btn.move(230, 700)
+        self.plan_btn.clicked.connect(self.toggle_image)
+
+        self.btn3 = QPushButton("Workout Plan")
+
+    def toggle_image(self):
+        """Handle button click to toggle image"""
+        new_pixmap = self.controller.toggle_image()
+        self.image_label.setPixmap(new_pixmap)
+
+    def show_history_page(self):
+        if not self.history_page:
+            self.history_page = HistoryPage(parent=self)
+            self.history_page.exit_requested.connect(self.hide_history_page)
+        self.history_page.show()
+        self.history_page.raise_()
+
+    def hide_history_page(self):
+        if self.history_page:
+            self.history_page.hide()
+
+
+change_btn = """
+            QPushButton {
+                border: none;
+                background-color: transparent;
+                icon: url(/home/mahdi/Documents/sensor/ux/first_page/images/rotp.png);
+                icon-size: 50px 50px;
+            }
+            QPushButton:pressed {
+                icon: url(/home/mahdi/Documents/sensor/ux/first_page/images/rotpc2.png);
+            }
+        """
+
+plan_btn = """
+            QPushButton {
+                border: none;
+                background-color: transparent;
+                icon: url(/home/mahdi/Documents/sensor/ux/first_page/images/hist.png);
+                icon-size: 90px 130px;
+            }
+            QPushButton:pressed {
+                icon: url(/home/mahdi/Documents/sensor/ux/first_page/images/histc.png);
+            }
+        """
+
+hist_btn = """
+            QPushButton {
+                border: none;
+                background-color: transparent;
+                icon: url(/home/mahdi/Documents/sensor/ux/first_page/images/date.png);
+                icon-size: 90px 130px;
+            }
+            QPushButton:pressed {
+                icon: url(/home/mahdi/Documents/sensor/ux/first_page/images/datep.png);
+            }
+        """
