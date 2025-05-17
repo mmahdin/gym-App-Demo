@@ -21,8 +21,8 @@ class FirstPageView(QWidget):
         # Assuming ClickableRegions is a QLabel subclass
         self.image_label = ClickableRegions()
         self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_label.setPixmap(
-            self.controller.pixmap1)  # Set initial image
+        self.image_label.setPixmap(self.controller.pixmap1)
+        self.image_label.mother = self
         self.image_label.setParent(self)
         self.image_label.move(70, 30)
 
@@ -38,14 +38,14 @@ class FirstPageView(QWidget):
         self.hist_btn.setIcon(
             QIcon('/home/mahdi/Documents/sensor/ux/first_page/images/hist.png'))
         self.hist_btn.setStyleSheet(hist_btn)
-        self.hist_btn.move(120, 700)
+        self.hist_btn.move(140, 700)
         self.hist_btn.clicked.connect(self.show_history_page)
 
         self.plan_btn = QPushButton(self)
         self.plan_btn.setIcon(
             QIcon('/home/mahdi/Documents/sensor/ux/first_page/images/plan.png'))
         self.plan_btn.setStyleSheet(plan_btn)
-        self.plan_btn.move(230, 700)
+        self.plan_btn.move(250, 700)
         self.plan_btn.clicked.connect(self.toggle_image)
 
         self.btn3 = QPushButton("Workout Plan")
@@ -54,6 +54,8 @@ class FirstPageView(QWidget):
         """Handle button click to toggle image"""
         new_pixmap = self.controller.toggle_image()
         self.image_label.setPixmap(new_pixmap)
+        self.image_label.face = (self.image_label.face + 1) % 2
+        self.image_label.update()
 
     def show_history_page(self):
         if not self.history_page:

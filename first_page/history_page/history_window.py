@@ -3,6 +3,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QCalendarWidget, QPushButton
 from PySide6.QtCore import Signal, Qt, QDate
 from PySide6.QtGui import QTextCharFormat, QColor
 from first_page.history_page.day_details.day_details_window import DayDetailsWindow
+import csv
 
 
 class HistoryPage(QWidget):
@@ -38,24 +39,26 @@ class HistoryPage(QWidget):
 
         # Modify with your actual file path
         self.load_status_from_file(
-            "/home/mahdi/Documents/sensor/ux/first_page/history_page/database/data.txt")
+            "/home/mahdi/Documents/sensor/ux/first_page/history_page/day_details/database/data.csv")
 
     def load_status_from_file(self, filepath):
+        unique_dates = set()
+        with open(filepath, mode='r', newline='') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                unique_dates.add(row['date'])
+        unique_dates_list = list(unique_dates)
+
         format_green = QTextCharFormat()
         format_green.setBackground(QColor("#00ab00"))
 
         try:
-            with open(filepath, "r") as f:
-                for line in f:
-                    date_str, value_str = line.strip().split(",")
-                    date = QDate.fromString(date_str, "yyyy-MM-dd")
-                    value = int(value_str)
 
-                    if not date.isValid():
-                        continue  # Skip invalid dates
-
-                    if value == 1:
-                        self.calendar.setDateTextFormat(date, format_green)
+            for date_str in unique_dates_list:
+                date = QDate.fromString(date_str, "yyyy-MM-dd")
+                if not date.isValid():
+                    continue
+                self.calendar.setDateTextFormat(date, format_green)
         except Exception as e:
             print(f"Error reading file: {e}")
 
