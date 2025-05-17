@@ -5,6 +5,7 @@ from first_page.controller import FirstPageController
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import QSize
 from first_page.history_page.history_window import HistoryPage
+from first_page.plan_page.plan_window import PlanePage
 
 
 class FirstPageView(QWidget):
@@ -14,6 +15,7 @@ class FirstPageView(QWidget):
         super().__init__()
         self.controller = FirstPageController(self)
         self.history_page = None
+        self.plan_page = None
         self._init_ui()
 
     def _init_ui(self):
@@ -46,7 +48,7 @@ class FirstPageView(QWidget):
             QIcon('/home/mahdi/Documents/sensor/ux/first_page/images/plan.png'))
         self.plan_btn.setStyleSheet(plan_btn)
         self.plan_btn.move(250, 700)
-        self.plan_btn.clicked.connect(self.toggle_image)
+        self.plan_btn.clicked.connect(self.show_plan_page)
 
         self.btn3 = QPushButton("Workout Plan")
 
@@ -67,6 +69,18 @@ class FirstPageView(QWidget):
     def hide_history_page(self):
         if self.history_page:
             self.history_page.hide()
+
+    def show_plan_page(self):
+        if not self.plan_page:
+            self.plan_page = PlanePage(parent=self)
+            self.plan_page.exit_requested.connect(self.hide_plan_page)
+        self.plan_page.show_machines()
+        self.plan_page.show()
+        self.plan_page.raise_()
+
+    def hide_plan_page(self):
+        if self.plan_page:
+            self.plan_page.hide()
 
 
 change_btn = """

@@ -27,3 +27,5 @@ def apply_gym_theme(window):
             background-color: #14172a; /* Dark background */
         }
     """)
+
+# 14172a

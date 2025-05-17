@@ -5,6 +5,8 @@ from PySide6.QtCore import Qt, Signal, QDate
 from PySide6.QtGui import QIcon, QPixmap
 import csv
 from datetime import datetime, date
+from functools import partial
+from first_page.one_machine.make_plan import MakePlan
 
 
 class MuscleHistory(QWidget):
@@ -21,6 +23,8 @@ class MuscleHistory(QWidget):
             "background-color: rgba(0, 0, 0, 245); color: white;")
         self.setGeometry(parent.rect())
         self.setAttribute(Qt.WA_StyledBackground, True)
+
+        self.make_plane = None
 
         # Back button setup
         self.back_btn = QPushButton(self)
@@ -88,11 +92,13 @@ class MuscleHistory(QWidget):
             machine_layout.setContentsMargins(5, 5, 5, 5)
             machine_layout.setAlignment(Qt.AlignCenter)
 
-            # Image label
-            image_label = QLabel()
-            image_label.setPixmap(pixmap.scaledToWidth(
-                100, Qt.SmoothTransformation))
-            image_label.setAlignment(Qt.AlignCenter)
+            image_label = QPushButton()
+            image_label.setIcon(
+                QIcon(image_path))
+            image_path = image_path.split('.png')[0]
+            name = image_path.split('/')[-1]
+            image_label.setStyleSheet(machine_btn.format(f'{image_path}p.png'))
+            image_label.clicked.connect(partial(self.on_machine_clicked, name))
 
             # Text label
             name_label = QLabel(machine)
@@ -176,6 +182,19 @@ class MuscleHistory(QWidget):
     def _get_image_path(self, type_str):
         return f"/home/mahdi/Documents/sensor/ux/first_page/history_page/day_details/images/{type_str}.png"
 
+    def on_machine_clicked(self, name):
+        if not self.make_plane:
+            self.make_plane = MakePlan(parent=self)
+            self.make_plane.exit_requested.connect(
+                self.hide_machine_window)
+        self.make_plane.machine(name)
+        self.make_plane.show()
+        self.make_plane.raise_()
+
+    def hide_machine_window(self):
+        if self.make_plane:
+            self.make_plane.hide()
+
 
 back_btn = """
     QPushButton {
@@ -186,4 +205,15 @@ back_btn = """
     QPushButton:pressed {
         icon: url(/home/mahdi/Documents/sensor/ux/first_page/images/back2p.png);
     }
+"""
+
+machine_btn = """
+    QPushButton {{
+        border: none;
+        background-color: transparent;
+        icon-size: 100px 100px;
+    }}
+    QPushButton:pressed {{
+        icon: url({});
+    }}
 """

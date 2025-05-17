@@ -78,6 +78,5 @@ class ClickableRegions(QLabel):
         self.muscle_history.raise_()
 
     def hide_details_window(self):
-        print('shet')
         if self.muscle_history:
             self.muscle_history.hide()
