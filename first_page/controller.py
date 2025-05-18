@@ -2,13 +2,17 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtCore import QPoint
 from .regions import ClickableRegions
 from PySide6.QtCore import Qt
+from pathlib import Path
+
+# Get the directory of the current script
+BASE_DIR = Path(__file__).resolve().parent
 
 
 class FirstPageController:
     def __init__(self, view):
         self.view = view
-        self.img1 = "first_page/images/f.png"
-        self.img2 = "first_page/images/b.png"
+        self.img1 = str(BASE_DIR / "images/f.png")
+        self.img2 = str(BASE_DIR / "images/b.png")
         self.pixmap1 = QPixmap(self.img1).scaledToWidth(
             340, Qt.SmoothTransformation)
         self.pixmap2 = QPixmap(self.img2).scaledToWidth(

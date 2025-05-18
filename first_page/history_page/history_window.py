@@ -4,6 +4,10 @@ from PySide6.QtCore import Signal, Qt, QDate
 from PySide6.QtGui import QTextCharFormat, QColor
 from first_page.history_page.day_details.day_details_window import DayDetailsWindow
 import csv
+from pathlib import Path
+
+# Get the directory of the current script
+BASE_DIR = Path(__file__).resolve().parent
 
 
 class HistoryPage(QWidget):
@@ -39,7 +43,7 @@ class HistoryPage(QWidget):
 
         # Modify with your actual file path
         self.load_status_from_file(
-            "first_page/history_page/day_details/database/data.csv")
+            str(BASE_DIR / "day_details/database/data.csv"))
 
     def load_status_from_file(self, filepath):
         unique_dates = set()

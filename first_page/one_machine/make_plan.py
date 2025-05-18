@@ -20,6 +20,10 @@ from collections import deque
 import threading
 import subprocess
 
+from pathlib import Path
+
+# Get the directory of the current script
+BASE_DIR = Path(__file__).resolve().parent
 
 # Global queue
 data_queue = deque()
@@ -262,7 +266,7 @@ class MakePlan(QWidget):
         # Back button
         self.back_btn = QPushButton(self)
         self.back_btn.setIcon(
-            QIcon('first_page/images/back2.png'))
+            QIcon(str(BASE_DIR / '../images/back2.png')))
         self.back_btn.setStyleSheet(back_btn)
         self.back_btn.move(10, 760)
         self.back_btn.clicked.connect(self.handle_back)
@@ -270,7 +274,7 @@ class MakePlan(QWidget):
         # Go button
         self.go_btn = QPushButton(self)
         self.go_btn.setIcon(
-            QIcon('first_page/images/go.png'))
+            QIcon(str(BASE_DIR / '../images/go.png')))
         self.go_btn.setStyleSheet(connect_btn)
         self.go_btn.move(205, 730)
         self.go_btn.clicked.connect(self.connect_to_device)
@@ -278,7 +282,7 @@ class MakePlan(QWidget):
 
         self.disc_btn = QPushButton(self)
         self.disc_btn.setIcon(
-            QIcon('first_page/images/disconnected.png'))
+            QIcon(str(BASE_DIR / '../images/disconnected.png')))
         self.disc_btn.setStyleSheet(connect_btn)
         self.disc_btn.move(205, 730)
         self.disc_btn.clicked.connect(self.disc)
@@ -343,7 +347,8 @@ class MakePlan(QWidget):
         self.plot.setTitle(title_text, color='r' if is_discretized else 'w')
 
     def machine(self, name):
-        path = f'first_page/history_page/day_details/images/{name}.png'
+        path = str(
+            BASE_DIR / f'../history_page/day_details/images/{name}.png')
         self.go_btn.show()
 
         if not Path(path).exists():
@@ -366,7 +371,7 @@ class MakePlan(QWidget):
         # Show progress indicators
         self.back_btn.clicked.disconnect()
         self.back_btn.setIcon(
-            QIcon('first_page/images/back2g.png'))
+            QIcon(str(BASE_DIR / '../images/back2g.png')))
 
         self.progress_bar.setValue(0)
         self.progress_bar.show()
@@ -424,7 +429,7 @@ class MakePlan(QWidget):
         self.disc_btn.show()
         self.back_btn.clicked.connect(self.handle_back)
         self.back_btn.setIcon(
-            QIcon('first_page/images/back2.png'))
+            QIcon(str(BASE_DIR / '../images/back2.png')))
 
         self.start_worker()
 
@@ -485,24 +490,24 @@ class MakePlan(QWidget):
 
 
 # Styles
-back_btn = """
-    QPushButton {
+back_btn = f"""
+    QPushButton {{
         border: none;
         background-color: transparent;
         icon-size: 50px 50px;
-    }
-    QPushButton:pressed {
-        icon: url(first_page/images/back2p.png);
-    }
+    }}
+    QPushButton:pressed {{
+        icon: url({BASE_DIR / '../images/back2p.png'});
+    }}
 """
 
-connect_btn = """
-    QPushButton {
+connect_btn = f"""
+    QPushButton {{
         border: none;
         background-color: transparent;
         icon-size: 80px 80px;
-    }
-    QPushButton:pressed {
-        icon: url(first_page/images/gop.png);
-    }
+    }}
+    QPushButton:pressed {{
+        icon: url({BASE_DIR / '../images/gop.png'});
+    }}
 """

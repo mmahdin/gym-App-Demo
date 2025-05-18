@@ -4,6 +4,10 @@ from PySide6.QtWidgets import (QWidget, QLabel, QVBoxLayout, QPushButton,
 from PySide6.QtCore import Qt, Signal, QDate
 from PySide6.QtGui import QIcon, QPixmap
 import csv
+from pathlib import Path
+
+# Get the directory of the current script
+BASE_DIR = Path(__file__).resolve().parent
 
 
 class DayDetailsWindow(QWidget):
@@ -19,7 +23,7 @@ class DayDetailsWindow(QWidget):
         # Back button setup
         self.back_btn = QPushButton(self)
         self.back_btn.setIcon(
-            QIcon('first_page/images/back2.png'))
+            QIcon(str(BASE_DIR / '../../images/back2.png')))
         self.back_btn.setStyleSheet(back_btn)
         self.back_btn.move(10, 760)
         self.back_btn.clicked.connect(self.exit_requested.emit)
@@ -48,7 +52,8 @@ class DayDetailsWindow(QWidget):
         date_str = date.toString("yyyy-MM-dd")
 
         # Read CSV file (update path to your CSV file)
-        csv_path = "first_page/history_page/day_details/database/data.csv"
+        csv_path = str(
+            BASE_DIR / "database/data.csv")
         try:
             with open(csv_path, 'r') as file:
                 reader = csv.DictReader(file)
@@ -80,16 +85,16 @@ class DayDetailsWindow(QWidget):
         self.scroll_layout.addWidget(widget)
 
     def _get_image_path(self, type_str):
-        return f"first_page/history_page/day_details/images/{type_str}.png"
+        return str(BASE_DIR / f"images/{type_str}.png")
 
 
-back_btn = """
-    QPushButton {
+back_btn = f"""
+    QPushButton {{
         border: none;
         background-color: transparent;
         icon-size: 50px 50px;
-    }
-    QPushButton:pressed {
-        icon: url(first_page/images/back2p.png);
-    }
+    }}
+    QPushButton:pressed {{
+        icon: url({BASE_DIR / '../../images/back2p.png'});
+    }}
 """

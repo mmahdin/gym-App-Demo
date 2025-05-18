@@ -7,6 +7,11 @@ from PySide6.QtCore import QSize
 from first_page.history_page.history_window import HistoryPage
 from first_page.plan_page.plan_window import PlanePage
 
+from pathlib import Path
+
+# Get the directory of the current script
+BASE_DIR = Path(__file__).resolve().parent
+
 
 class FirstPageView(QWidget):
     exit_requested = Signal()
@@ -31,21 +36,21 @@ class FirstPageView(QWidget):
         # Special button setup
         self.change_btn = QPushButton(self)
         self.change_btn.setIcon(
-            QIcon('first_page/images/rotp.png'))
+            QIcon(str(BASE_DIR / 'images/rotp.png')))
         self.change_btn.setStyleSheet(change_btn)
         self.change_btn.move(10, 450)
         self.change_btn.clicked.connect(self.toggle_image)
 
         self.hist_btn = QPushButton(self)
         self.hist_btn.setIcon(
-            QIcon('first_page/images/hist.png'))
+            QIcon(str(BASE_DIR / 'images/hist.png')))
         self.hist_btn.setStyleSheet(hist_btn)
         self.hist_btn.move(140, 700)
         self.hist_btn.clicked.connect(self.show_history_page)
 
         self.plan_btn = QPushButton(self)
         self.plan_btn.setIcon(
-            QIcon('first_page/images/plan.png'))
+            QIcon(str(BASE_DIR / 'images/plan.png')))
         self.plan_btn.setStyleSheet(plan_btn)
         self.plan_btn.move(250, 700)
         self.plan_btn.clicked.connect(self.show_plan_page)
@@ -83,38 +88,38 @@ class FirstPageView(QWidget):
             self.plan_page.hide()
 
 
-change_btn = """
-            QPushButton {
+change_btn = f"""
+            QPushButton {{
                 border: none;
                 background-color: transparent;
                 icon: url(first_page/images/rotp.png);
                 icon-size: 50px 50px;
-            }
-            QPushButton:pressed {
-                icon: url(first_page/images/rotpc2.png);
-            }
+            }}
+            QPushButton:pressed {{
+                icon: url({BASE_DIR / 'images/rotpc2.png'});
+            }}
         """
 
-plan_btn = """
-            QPushButton {
+plan_btn = f"""
+            QPushButton {{
                 border: none;
                 background-color: transparent;
                 icon: url(first_page/images/hist.png);
                 icon-size: 90px 130px;
-            }
-            QPushButton:pressed {
-                icon: url(first_page/images/histc.png);
-            }
+            }}
+            QPushButton:pressed {{
+                icon: url({BASE_DIR / 'images/histc.png'});
+            }}
         """
 
-hist_btn = """
-            QPushButton {
+hist_btn = f"""
+            QPushButton {{
                 border: none;
                 background-color: transparent;
                 icon: url(first_page/images/date.png);
                 icon-size: 90px 130px;
-            }
-            QPushButton:pressed {
-                icon: url(first_page/images/datep.png);
-            }
+            }}
+            QPushButton:pressed {{
+                icon: url({BASE_DIR / 'images/datep.png'});
+            }}
         """

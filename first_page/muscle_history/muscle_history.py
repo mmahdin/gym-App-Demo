@@ -8,6 +8,11 @@ from datetime import datetime, date
 from functools import partial
 from first_page.one_machine.make_plan import MakePlan
 
+from pathlib import Path
+
+# Get the directory of the current script
+BASE_DIR = Path(__file__).resolve().parent
+
 
 class MuscleHistory(QWidget):
     exit_requested = Signal()
@@ -29,7 +34,7 @@ class MuscleHistory(QWidget):
         # Back button setup
         self.back_btn = QPushButton(self)
         self.back_btn.setIcon(
-            QIcon('first_page/images/back2.png'))
+            QIcon(str(BASE_DIR / '../images/back2.png')))
         self.back_btn.setStyleSheet(back_btn)
         self.back_btn.move(10, 760)
         self.back_btn.clicked.connect(self.exit_requested.emit)
@@ -57,7 +62,7 @@ class MuscleHistory(QWidget):
 
         self.show_history(region)
 
-        path = "first_page/history_page/day_details/images/{}.png"
+        path = str(BASE_DIR / "../history_page/day_details/images/{}.png")
         # Retrieve the list of machines for the given region
         machines = self.muscles2machine.get(region, [])
 
@@ -130,7 +135,8 @@ class MuscleHistory(QWidget):
             if widget:
                 widget.deleteLater()
 
-        path = "first_page/history_page/day_details/database/data.csv"
+        path = str(
+            BASE_DIR / "../history_page/day_details/database/data.csv")
 
         try:
             with open(path, newline='', encoding='utf-8') as csvfile:
@@ -180,7 +186,7 @@ class MuscleHistory(QWidget):
         self.scroll_layout.addWidget(widget)
 
     def _get_image_path(self, type_str):
-        return f"first_page/history_page/day_details/images/{type_str}.png"
+        return str(BASE_DIR / f"../history_page/day_details/images/{type_str}.png")
 
     def on_machine_clicked(self, name):
         if not self.make_plane:
@@ -196,15 +202,15 @@ class MuscleHistory(QWidget):
             self.make_plane.hide()
 
 
-back_btn = """
-    QPushButton {
+back_btn = f"""
+    QPushButton {{
         border: none;
         background-color: transparent;
         icon-size: 50px 50px;
-    }
-    QPushButton:pressed {
-        icon: url(first_page/images/back2p.png);
-    }
+    }}
+    QPushButton:pressed {{
+        icon: url({BASE_DIR / '../images/back2p.png'});
+    }}
 """
 
 machine_btn = """
