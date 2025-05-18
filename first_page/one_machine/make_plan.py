@@ -268,7 +268,7 @@ class MakePlan(QWidget):
         self.back_btn.setIcon(
             QIcon(str(BASE_DIR / '../images/back2.png')))
         self.back_btn.setStyleSheet(back_btn)
-        self.back_btn.move(10, 760)
+        self.back_btn.move(10, 720)
         self.back_btn.clicked.connect(self.handle_back)
 
         # Go button
@@ -276,7 +276,7 @@ class MakePlan(QWidget):
         self.go_btn.setIcon(
             QIcon(str(BASE_DIR / '../images/go.png')))
         self.go_btn.setStyleSheet(connect_btn)
-        self.go_btn.move(205, 730)
+        self.go_btn.move(205, 690)
         self.go_btn.clicked.connect(self.connect_to_device)
         self.go_btn.hide()
 
@@ -284,7 +284,7 @@ class MakePlan(QWidget):
         self.disc_btn.setIcon(
             QIcon(str(BASE_DIR / '../images/disconnected.png')))
         self.disc_btn.setStyleSheet(connect_btn)
-        self.disc_btn.move(205, 730)
+        self.disc_btn.move(205, 690)
         self.disc_btn.clicked.connect(self.disc)
         self.disc_btn.hide()
 
@@ -295,18 +295,18 @@ class MakePlan(QWidget):
         # Progress bar (hidden initially)
         self.progress_bar = QProgressBar(self)
         self.progress_bar.setRange(0, 100)
-        self.progress_bar.move(300, 770)
+        self.progress_bar.move(300, 720)
         self.progress_bar.hide()
 
         # Status label (hidden initially)
         self.status_label = QLabel(self)
-        self.status_label.move(10, 650)
-        self.status_label.resize(500, 60)
+        self.status_label.move(10, 620)
+        self.status_label.resize(500, 40)
         self.status_label.hide()
 
         self.plot_widget = pg.PlotWidget(self)
-        self.plot_widget.move(5, 210)
-        self.plot_widget.resize(470, 440)
+        self.plot_widget.move(5, 160)
+        self.plot_widget.resize(430, 420)
 
         self.plot = self.plot_widget.getPlotItem()
         self.signal_curve = self.plot.plot(pen='c')

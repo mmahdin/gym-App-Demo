@@ -45,14 +45,14 @@ class FirstPageView(QWidget):
         self.hist_btn.setIcon(
             QIcon(str(BASE_DIR / 'images/hist.png')))
         self.hist_btn.setStyleSheet(hist_btn)
-        self.hist_btn.move(140, 700)
+        self.hist_btn.move(140, 680)
         self.hist_btn.clicked.connect(self.show_history_page)
 
         self.plan_btn = QPushButton(self)
         self.plan_btn.setIcon(
             QIcon(str(BASE_DIR / 'images/plan.png')))
         self.plan_btn.setStyleSheet(plan_btn)
-        self.plan_btn.move(250, 700)
+        self.plan_btn.move(250, 680)
         self.plan_btn.clicked.connect(self.show_plan_page)
 
         self.btn3 = QPushButton("Workout Plan")

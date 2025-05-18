@@ -6,7 +6,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("My Mobile App")
-        self.setFixedSize(480, 820)  # Mobile-like size
+        self.setFixedSize(480, 780)  # Mobile-like size
 
         apply_gym_theme(self)
 

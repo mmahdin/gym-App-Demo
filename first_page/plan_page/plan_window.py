@@ -31,7 +31,7 @@ class PlanePage(QWidget):
         self.back_btn.setIcon(
             QIcon(str(BASE_DIR / '../images/back2.png')))
         self.back_btn.setStyleSheet(back_btn)
-        self.back_btn.move(10, 760)
+        self.back_btn.move(10, 720)
         self.back_btn.clicked.connect(self.exit_requested.emit)
 
     def show_machines(self):
@@ -123,7 +123,7 @@ machine_btn = """
     QPushButton {{
         border: none;
         background-color: transparent;
-        icon-size: 200px 200px;
+        icon-size: 150px 150px;
     }}
     QPushButton:pressed {{
         icon: url({});

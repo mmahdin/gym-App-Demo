@@ -36,7 +36,7 @@ class MuscleHistory(QWidget):
         self.back_btn.setIcon(
             QIcon(str(BASE_DIR / '../images/back2.png')))
         self.back_btn.setStyleSheet(back_btn)
-        self.back_btn.move(10, 760)
+        self.back_btn.move(10, 720)
         self.back_btn.clicked.connect(self.exit_requested.emit)
 
         # Scroll area setup
@@ -72,7 +72,7 @@ class MuscleHistory(QWidget):
 
         # Create a new scroll area
         self.scroll_area = QScrollArea(self)
-        self.scroll_area.setGeometry(0, 0, self.width(), self.height() - 650)
+        self.scroll_area.setGeometry(0, 0, self.width(), self.height() - 610)
         self.scroll_area.setWidgetResizable(True)
         # self.scroll_area.setStyleSheet("background-color: transparent;")
 
@@ -119,14 +119,14 @@ class MuscleHistory(QWidget):
         # Add stretch to push content to the top
         layout.addStretch()
         self.scroll_area.show()
-        self.scroll_area.move(10, 570)
+        self.scroll_area.move(10, 560)
 
         self.instruction_label = QLabel(
             "Choose a machine to work this muscle", self)
         self.instruction_label.setStyleSheet(
             "color: white; font-size: 18px; font-weight: bold;")
         self.instruction_label.setAlignment(Qt.AlignCenter)
-        self.instruction_label.move(10, 560)
+        self.instruction_label.move(10, 550)
 
     def show_history(self, region):
         while self.scroll_layout.count():

@@ -25,7 +25,7 @@ class DayDetailsWindow(QWidget):
         self.back_btn.setIcon(
             QIcon(str(BASE_DIR / '../../images/back2.png')))
         self.back_btn.setStyleSheet(back_btn)
-        self.back_btn.move(10, 760)
+        self.back_btn.move(10, 720)
         self.back_btn.clicked.connect(self.exit_requested.emit)
 
         # Scroll area setup
