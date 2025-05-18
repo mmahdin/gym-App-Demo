@@ -19,8 +19,11 @@ import json
 from collections import deque
 import threading
 import subprocess
+import platform
+
 
 from pathlib import Path
+
 
 # Get the directory of the current script
 BASE_DIR = Path(__file__).resolve().parent
@@ -39,13 +42,14 @@ class DiscWorker(QObject):
         self.mac = mac
 
     def run(self):
-        command = ["bt-device", "-r", self.mac]
-        try:
-            result = subprocess.run(
-                command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            self.output.emit(result.stdout)
-        except subprocess.CalledProcessError as e:
-            self.error.emit(e.stderr)
+        if platform.system() == "Linux":
+            command = ["bt-device", "-r", self.mac]
+            try:
+                result = subprocess.run(
+                    command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                self.output.emit(result.stdout)
+            except subprocess.CalledProcessError as e:
+                self.error.emit(e.stderr)
         self.finished.emit()
 
 
@@ -70,14 +74,15 @@ class BluetoothScannerWorker(QObject):
             self.finished.emit()
             return
 
-        self.progress.emit("Checking Bluetooth...", 5)
-        command = ["bt-device", "-r", self.mac]
-        try:
-            result = subprocess.run(
-                command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            print("Command output:", result.stdout)
-        except subprocess.CalledProcessError as e:
-            print("Error:", e.stderr)
+        if platform.system() == "Linux":
+            self.progress.emit("Checking Bluetooth...", 5)
+            command = ["bt-device", "-r", self.mac]
+            try:
+                result = subprocess.run(
+                    command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                print("Command output:", result.stdout)
+            except subprocess.CalledProcessError as e:
+                print("Error:", e.stderr)
 
         if not self._is_running:
             self.finished.emit()
