@@ -353,7 +353,7 @@ class MakePlan(QWidget):
 
     def machine(self, name):
         path = str(
-            BASE_DIR / Path(f'../history_page/day_details/images/{name}.png'))
+            (BASE_DIR / f'../history_page/day_details/images/{name}.png').resolve().as_posix())
         self.go_btn.show()
 
         if not Path(path).exists():
