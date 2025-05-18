@@ -66,7 +66,8 @@ class PlanePage(QWidget):
                 QIcon(image_path))
             image_path = image_path.split('.png')[0]
             name = image_path.split('/')[-1]
-            image_label.setStyleSheet(machine_btn.format(f'{image_path}p.png'))
+            image_label.setStyleSheet(machine_btn.format(
+                f'{Path(image_path).resolve().as_posix()}p.png'))
             image_label.clicked.connect(partial(self.on_machine_clicked, name))
 
             # Machine name label
@@ -115,7 +116,7 @@ back_btn = f"""
         icon-size: 50px 50px;
     }}
     QPushButton:pressed {{
-        icon: url({BASE_DIR / '../images/back2p.png'});
+        icon: url({(BASE_DIR / '../images/back2p.png').resolve().as_posix()});
     }}
 """
 

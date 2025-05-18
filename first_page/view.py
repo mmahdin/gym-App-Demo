@@ -96,7 +96,7 @@ change_btn = f"""
                 icon-size: 50px 50px;
             }}
             QPushButton:pressed {{
-                icon: url({BASE_DIR / 'images/rotpc2.png'});
+                icon: url({(BASE_DIR / 'images/rotpc2.png').resolve().as_posix()});
             }}
         """
 
@@ -108,7 +108,7 @@ plan_btn = f"""
                 icon-size: 90px 130px;
             }}
             QPushButton:pressed {{
-                icon: url({BASE_DIR / 'images/histc.png'});
+                icon: url({(BASE_DIR / 'images/histc.png').resolve().as_posix()});
             }}
         """
 
@@ -120,6 +120,6 @@ hist_btn = f"""
                 icon-size: 90px 130px;
             }}
             QPushButton:pressed {{
-                icon: url({BASE_DIR / 'images/datep.png'});
+                icon: url({(BASE_DIR / 'images/datep.png').resolve().as_posix()});
             }}
         """

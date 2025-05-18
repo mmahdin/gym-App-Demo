@@ -95,6 +95,6 @@ back_btn = f"""
         icon-size: 50px 50px;
     }}
     QPushButton:pressed {{
-        icon: url({BASE_DIR / '../../images/back2p.png'});
+        icon: url({(BASE_DIR / '../../images/back2p.png').resolve().as_posix()});
     }}
 """

@@ -353,7 +353,7 @@ class MakePlan(QWidget):
 
     def machine(self, name):
         path = str(
-            BASE_DIR / f'../history_page/day_details/images/{name}.png')
+            BASE_DIR / Path(f'../history_page/day_details/images/{name}.png'))
         self.go_btn.show()
 
         if not Path(path).exists():
@@ -438,7 +438,7 @@ class MakePlan(QWidget):
 
         self.start_worker()
 
-    def handle_back(self):
+    def clear_(self):
         self.progress_bar.hide()
         self.status_label.hide()
         self.disc_btn.hide()
@@ -468,6 +468,8 @@ class MakePlan(QWidget):
             self.worker_thread.quit()
             self.worker_thread.wait()
 
+    def handle_back(self):
+        self.clear_()
         self.exit_requested.emit()
 
     def disc(self):
@@ -486,6 +488,8 @@ class MakePlan(QWidget):
 
         self.disc_btn.hide()
         self.go_btn.show()
+        self.clear_()
+        self.analyse_worker.data_ready.disconnect(self.update_plot)
 
     def on_output(self, text):
         print("Command output:", text)
@@ -502,7 +506,7 @@ back_btn = f"""
         icon-size: 50px 50px;
     }}
     QPushButton:pressed {{
-        icon: url({BASE_DIR / '../images/back2p.png'});
+        icon: url({(BASE_DIR / '../images/back2p.png').resolve().as_posix()});
     }}
 """
 
@@ -513,6 +517,6 @@ connect_btn = f"""
         icon-size: 80px 80px;
     }}
     QPushButton:pressed {{
-        icon: url({BASE_DIR / '../images/gop.png'});
+        icon: url({(BASE_DIR / '../images/gop.png').resolve().as_posix()});
     }}
 """
