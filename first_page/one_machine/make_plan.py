@@ -195,6 +195,7 @@ class DataAnalyzerWorker(QObject):
         self.timestep = 1 / fs
         self.total_time = 0
         self.peak_count = 0
+        self.discretization_threshold = 0.5
 
     def process(self):
         while self.running:
@@ -216,9 +217,8 @@ class DataAnalyzerWorker(QObject):
             peaks_y = self.buffer[peaks]
             self.peak_count += len(peaks)
 
-            # Unique ratio and discretization
-            u_ratio = len(set(new_data)) / len(new_data)
-            is_discretized = u_ratio < 0.1
+            u_ratio = self.unique_ratio(new_data)
+            is_discretized = u_ratio < self.discretization_threshold
 
             self.data_ready.emit(
                 self.time_vals.copy(),
@@ -230,6 +230,9 @@ class DataAnalyzerWorker(QObject):
             )
 
             QThread.msleep(int(self.step_sec * 20))
+
+    def unique_ratio(self, signal):
+        return len(np.unique(np.round(signal, 6))) / len(signal)
 
     def stop(self):
         self.running = False
@@ -311,7 +314,7 @@ class MakePlan(QWidget):
 
         self.worker_thread = QThread()
         self.analyse_worker = DataAnalyzerWorker(
-            fs=100, step_sec=0.02, duration_sec=5, queue_ref=data_queue)
+            fs=100, step_sec=0.01, duration_sec=5, queue_ref=data_queue)
         self.analyse_worker.moveToThread(self.worker_thread)
 
         self.worker_thread.started.connect(self.analyse_worker.process)
