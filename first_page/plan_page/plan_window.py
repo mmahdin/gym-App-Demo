@@ -25,7 +25,7 @@ class PlanePage(QWidget):
         # Back button setup
         self.back_btn = QPushButton(self)
         self.back_btn.setIcon(
-            QIcon('/home/mahdi/Documents/sensor/ux/first_page/images/back2.png'))
+            QIcon('first_page/images/back2.png'))
         self.back_btn.setStyleSheet(back_btn)
         self.back_btn.move(10, 760)
         self.back_btn.clicked.connect(self.exit_requested.emit)
@@ -55,7 +55,7 @@ class PlanePage(QWidget):
             machine_layout.setAlignment(Qt.AlignCenter)
 
             # Load image
-            image_path = f'/home/mahdi/Documents/sensor/ux/first_page/history_page/day_details/images/{machine}.png'
+            image_path = f'first_page/history_page/day_details/images/{machine}.png'
             image_label = QPushButton()
             image_label.setIcon(
                 QIcon(image_path))
@@ -110,7 +110,7 @@ back_btn = """
         icon-size: 50px 50px;
     }
     QPushButton:pressed {
-        icon: url(/home/mahdi/Documents/sensor/ux/first_page/images/back2p.png);
+        icon: url(first_page/images/back2p.png);
     }
 """
 

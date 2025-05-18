@@ -19,7 +19,7 @@ class DayDetailsWindow(QWidget):
         # Back button setup
         self.back_btn = QPushButton(self)
         self.back_btn.setIcon(
-            QIcon('/home/mahdi/Documents/sensor/ux/first_page/images/back2.png'))
+            QIcon('first_page/images/back2.png'))
         self.back_btn.setStyleSheet(back_btn)
         self.back_btn.move(10, 760)
         self.back_btn.clicked.connect(self.exit_requested.emit)
@@ -48,7 +48,7 @@ class DayDetailsWindow(QWidget):
         date_str = date.toString("yyyy-MM-dd")
 
         # Read CSV file (update path to your CSV file)
-        csv_path = "/home/mahdi/Documents/sensor/ux/first_page/history_page/day_details/database/data.csv"
+        csv_path = "first_page/history_page/day_details/database/data.csv"
         try:
             with open(csv_path, 'r') as file:
                 reader = csv.DictReader(file)
@@ -80,7 +80,7 @@ class DayDetailsWindow(QWidget):
         self.scroll_layout.addWidget(widget)
 
     def _get_image_path(self, type_str):
-        return f"/home/mahdi/Documents/sensor/ux/first_page/history_page/day_details/images/{type_str}.png"
+        return f"first_page/history_page/day_details/images/{type_str}.png"
 
 
 back_btn = """
@@ -90,6 +90,6 @@ back_btn = """
         icon-size: 50px 50px;
     }
     QPushButton:pressed {
-        icon: url(/home/mahdi/Documents/sensor/ux/first_page/images/back2p.png);
+        icon: url(first_page/images/back2p.png);
     }
 """

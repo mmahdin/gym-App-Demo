@@ -31,21 +31,21 @@ class FirstPageView(QWidget):
         # Special button setup
         self.change_btn = QPushButton(self)
         self.change_btn.setIcon(
-            QIcon('/home/mahdi/Documents/sensor/ux/first_page/images/rotp.png'))
+            QIcon('first_page/images/rotp.png'))
         self.change_btn.setStyleSheet(change_btn)
         self.change_btn.move(10, 450)
         self.change_btn.clicked.connect(self.toggle_image)
 
         self.hist_btn = QPushButton(self)
         self.hist_btn.setIcon(
-            QIcon('/home/mahdi/Documents/sensor/ux/first_page/images/hist.png'))
+            QIcon('first_page/images/hist.png'))
         self.hist_btn.setStyleSheet(hist_btn)
         self.hist_btn.move(140, 700)
         self.hist_btn.clicked.connect(self.show_history_page)
 
         self.plan_btn = QPushButton(self)
         self.plan_btn.setIcon(
-            QIcon('/home/mahdi/Documents/sensor/ux/first_page/images/plan.png'))
+            QIcon('first_page/images/plan.png'))
         self.plan_btn.setStyleSheet(plan_btn)
         self.plan_btn.move(250, 700)
         self.plan_btn.clicked.connect(self.show_plan_page)
@@ -87,11 +87,11 @@ change_btn = """
             QPushButton {
                 border: none;
                 background-color: transparent;
-                icon: url(/home/mahdi/Documents/sensor/ux/first_page/images/rotp.png);
+                icon: url(first_page/images/rotp.png);
                 icon-size: 50px 50px;
             }
             QPushButton:pressed {
-                icon: url(/home/mahdi/Documents/sensor/ux/first_page/images/rotpc2.png);
+                icon: url(first_page/images/rotpc2.png);
             }
         """
 
@@ -99,11 +99,11 @@ plan_btn = """
             QPushButton {
                 border: none;
                 background-color: transparent;
-                icon: url(/home/mahdi/Documents/sensor/ux/first_page/images/hist.png);
+                icon: url(first_page/images/hist.png);
                 icon-size: 90px 130px;
             }
             QPushButton:pressed {
-                icon: url(/home/mahdi/Documents/sensor/ux/first_page/images/histc.png);
+                icon: url(first_page/images/histc.png);
             }
         """
 
@@ -111,10 +111,10 @@ hist_btn = """
             QPushButton {
                 border: none;
                 background-color: transparent;
-                icon: url(/home/mahdi/Documents/sensor/ux/first_page/images/date.png);
+                icon: url(first_page/images/date.png);
                 icon-size: 90px 130px;
             }
             QPushButton:pressed {
-                icon: url(/home/mahdi/Documents/sensor/ux/first_page/images/datep.png);
+                icon: url(first_page/images/datep.png);
             }
         """

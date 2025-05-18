@@ -262,7 +262,7 @@ class MakePlan(QWidget):
         # Back button
         self.back_btn = QPushButton(self)
         self.back_btn.setIcon(
-            QIcon('/home/mahdi/Documents/sensor/ux/first_page/images/back2.png'))
+            QIcon('first_page/images/back2.png'))
         self.back_btn.setStyleSheet(back_btn)
         self.back_btn.move(10, 760)
         self.back_btn.clicked.connect(self.handle_back)
@@ -270,7 +270,7 @@ class MakePlan(QWidget):
         # Go button
         self.go_btn = QPushButton(self)
         self.go_btn.setIcon(
-            QIcon('/home/mahdi/Documents/sensor/ux/first_page/images/go.png'))
+            QIcon('first_page/images/go.png'))
         self.go_btn.setStyleSheet(connect_btn)
         self.go_btn.move(205, 730)
         self.go_btn.clicked.connect(self.connect_to_device)
@@ -278,7 +278,7 @@ class MakePlan(QWidget):
 
         self.disc_btn = QPushButton(self)
         self.disc_btn.setIcon(
-            QIcon('/home/mahdi/Documents/sensor/ux/first_page/images/disconnected.png'))
+            QIcon('first_page/images/disconnected.png'))
         self.disc_btn.setStyleSheet(connect_btn)
         self.disc_btn.move(205, 730)
         self.disc_btn.clicked.connect(self.disc)
@@ -343,7 +343,7 @@ class MakePlan(QWidget):
         self.plot.setTitle(title_text, color='r' if is_discretized else 'w')
 
     def machine(self, name):
-        path = f'/home/mahdi/Documents/sensor/ux/first_page/history_page/day_details/images/{name}.png'
+        path = f'first_page/history_page/day_details/images/{name}.png'
         self.go_btn.show()
 
         if not Path(path).exists():
@@ -366,7 +366,7 @@ class MakePlan(QWidget):
         # Show progress indicators
         self.back_btn.clicked.disconnect()
         self.back_btn.setIcon(
-            QIcon('/home/mahdi/Documents/sensor/ux/first_page/images/back2g.png'))
+            QIcon('first_page/images/back2g.png'))
 
         self.progress_bar.setValue(0)
         self.progress_bar.show()
@@ -424,7 +424,7 @@ class MakePlan(QWidget):
         self.disc_btn.show()
         self.back_btn.clicked.connect(self.handle_back)
         self.back_btn.setIcon(
-            QIcon('/home/mahdi/Documents/sensor/ux/first_page/images/back2.png'))
+            QIcon('first_page/images/back2.png'))
 
         self.start_worker()
 
@@ -492,7 +492,7 @@ back_btn = """
         icon-size: 50px 50px;
     }
     QPushButton:pressed {
-        icon: url(/home/mahdi/Documents/sensor/ux/first_page/images/back2p.png);
+        icon: url(first_page/images/back2p.png);
     }
 """
 
@@ -503,6 +503,6 @@ connect_btn = """
         icon-size: 80px 80px;
     }
     QPushButton:pressed {
-        icon: url(/home/mahdi/Documents/sensor/ux/first_page/images/gop.png);
+        icon: url(first_page/images/gop.png);
     }
 """

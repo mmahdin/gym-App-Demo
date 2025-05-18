@@ -39,7 +39,7 @@ class HistoryPage(QWidget):
 
         # Modify with your actual file path
         self.load_status_from_file(
-            "/home/mahdi/Documents/sensor/ux/first_page/history_page/day_details/database/data.csv")
+            "first_page/history_page/day_details/database/data.csv")
 
     def load_status_from_file(self, filepath):
         unique_dates = set()

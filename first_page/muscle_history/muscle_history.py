@@ -29,7 +29,7 @@ class MuscleHistory(QWidget):
         # Back button setup
         self.back_btn = QPushButton(self)
         self.back_btn.setIcon(
-            QIcon('/home/mahdi/Documents/sensor/ux/first_page/images/back2.png'))
+            QIcon('first_page/images/back2.png'))
         self.back_btn.setStyleSheet(back_btn)
         self.back_btn.move(10, 760)
         self.back_btn.clicked.connect(self.exit_requested.emit)
@@ -57,7 +57,7 @@ class MuscleHistory(QWidget):
 
         self.show_history(region)
 
-        path = "/home/mahdi/Documents/sensor/ux/first_page/history_page/day_details/images/{}.png"
+        path = "first_page/history_page/day_details/images/{}.png"
         # Retrieve the list of machines for the given region
         machines = self.muscles2machine.get(region, [])
 
@@ -130,7 +130,7 @@ class MuscleHistory(QWidget):
             if widget:
                 widget.deleteLater()
 
-        path = "/home/mahdi/Documents/sensor/ux/first_page/history_page/day_details/database/data.csv"
+        path = "first_page/history_page/day_details/database/data.csv"
 
         try:
             with open(path, newline='', encoding='utf-8') as csvfile:
@@ -180,7 +180,7 @@ class MuscleHistory(QWidget):
         self.scroll_layout.addWidget(widget)
 
     def _get_image_path(self, type_str):
-        return f"/home/mahdi/Documents/sensor/ux/first_page/history_page/day_details/images/{type_str}.png"
+        return f"first_page/history_page/day_details/images/{type_str}.png"
 
     def on_machine_clicked(self, name):
         if not self.make_plane:
@@ -203,7 +203,7 @@ back_btn = """
         icon-size: 50px 50px;
     }
     QPushButton:pressed {
-        icon: url(/home/mahdi/Documents/sensor/ux/first_page/images/back2p.png);
+        icon: url(first_page/images/back2p.png);
     }
 """
 
