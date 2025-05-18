@@ -1,0 +1,12 @@
+async-timeout==4.0.3
+bleak==0.22.3
+dbus-fast==2.44.1
+numpy==2.2.6
+pyqtgraph==0.13.7
+PySide6==6.9.0
+PySide6_Addons==6.9.0
+PySide6_Essentials==6.9.0
+qasync==0.27.1
+scipy==1.15.3
+shiboken6==6.9.0
+typing_extensions==4.13.2

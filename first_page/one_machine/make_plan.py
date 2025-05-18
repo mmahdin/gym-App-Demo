@@ -1,3 +1,12 @@
+import sys
+from PySide6.QtCore import QObject, Signal, QThread
+from pyqtgraph import PlotWidget, GraphicsLayoutWidget, plot
+from PySide6.QtCore import QObject, QTimer, Signal
+from scipy.signal import find_peaks
+import numpy as np
+import pyqtgraph as pg
+from PySide6.QtCore import QTimer
+from PySide6.QtWidgets import QWidget, QVBoxLayout
 from PySide6.QtWidgets import (QWidget, QLabel, QVBoxLayout, QPushButton,
                                QScrollArea, QHBoxLayout, QProgressBar)
 from PySide6.QtCore import Qt, Signal, QThread, QTime, Slot, QObject, QTimer
@@ -139,6 +148,7 @@ class DeviceConnectionWorker(QObject):
             self.finished.emit()
 
     def updateData(self, DeviceModel):
+        global data_queue
         if not self._is_running:
             return
 
@@ -159,7 +169,71 @@ class DeviceConnectionWorker(QObject):
             "AsZ": sensor_data["AsZ"],
             "timestamp": QTime.currentTime().msecsSinceStartOfDay() / 1000.0,
         }
-        data_queue.append(data_point)
+        angles = np.array(
+            [data_point["AngX"], data_point["AngY"], data_point["AngZ"]])
+        angle_magnitude = np.linalg.norm(angles)
+        data_queue.append(angle_magnitude)
+
+
+class DataAnalyzerWorker(QObject):
+    # (time_vals, buffer, peaks_y, u_ratio, peak_count, is_discretized)
+    data_ready = Signal(np.ndarray, np.ndarray, np.ndarray, float, int, bool)
+    finished = Signal()
+
+    def __init__(self, fs, step_sec, duration_sec, queue_ref):
+        super().__init__()
+        self.fs = fs
+        self.step_sec = step_sec
+        self.duration_sec = duration_sec
+        self.step_size = int(fs * step_sec)
+        self.window_size = int(fs * duration_sec)
+        self.queue = queue_ref
+        self.running = True
+
+        self.buffer = np.zeros(self.window_size)
+        self.time_vals = np.linspace(-self.duration_sec, 0, self.window_size)
+        self.timestep = 1 / fs
+        self.total_time = 0
+        self.peak_count = 0
+
+    def process(self):
+        while self.running:
+            if len(self.queue) < self.step_size:
+                QThread.msleep(int(self.step_sec * 10))  # Avoid busy wait
+                continue
+            print(self.queue[-1])
+            new_data = np.array([self.queue.popleft()
+                                for _ in range(self.step_size)])
+
+            self.buffer[:-self.step_size] = self.buffer[self.step_size:]
+            self.buffer[-self.step_size:] = new_data
+            self.time_vals += self.step_size * self.timestep
+            self.total_time += self.step_size * self.timestep
+
+            # Peak detection
+            peaks, _ = find_peaks(
+                self.buffer, prominence=0.5, distance=self.fs // 10)
+            peaks_y = self.buffer[peaks]
+            self.peak_count += len(peaks)
+
+            # Unique ratio and discretization
+            u_ratio = len(set(new_data)) / len(new_data)
+            is_discretized = u_ratio < 0.1
+
+            self.data_ready.emit(
+                self.time_vals.copy(),
+                self.buffer.copy(),
+                peaks_y.copy(),
+                u_ratio,
+                self.peak_count,
+                is_discretized
+            )
+
+            QThread.msleep(int(self.step_sec * 20))
+
+    def stop(self):
+        self.running = False
+        self.finished.emit()
 
 
 class MakePlan(QWidget):
@@ -179,6 +253,8 @@ class MakePlan(QWidget):
         self.scanner_worker = None
         self.worker = None
         self.device_worker = None
+        self.worker_thread = None
+        self.analyse_worker = None
 
         # Back button
         self.back_btn = QPushButton(self)
@@ -220,6 +296,48 @@ class MakePlan(QWidget):
         self.status_label.move(10, 650)
         self.status_label.resize(500, 60)
         self.status_label.hide()
+
+        self.plot_widget = pg.PlotWidget(self)
+        self.plot_widget.move(5, 210)
+        self.plot_widget.resize(470, 440)
+
+        self.plot = self.plot_widget.getPlotItem()
+        self.signal_curve = self.plot.plot(pen='c')
+        self.peaks_scatter = self.plot.plot(
+            pen=None, symbol='x', symbolBrush='r')
+
+    def start_worker(self):
+        global data_queue
+
+        self.worker_thread = QThread()
+        self.analyse_worker = DataAnalyzerWorker(
+            fs=100, step_sec=0.02, duration_sec=5, queue_ref=data_queue)
+        self.analyse_worker.moveToThread(self.worker_thread)
+
+        self.worker_thread.started.connect(self.analyse_worker.process)
+        self.analyse_worker.data_ready.connect(self.update_plot)
+        self.exit_requested.connect(self.analyse_worker.stop)
+        self.analyse_worker.finished.connect(self.worker_thread.quit)
+        self.analyse_worker.finished.connect(self.analyse_worker.deleteLater)
+        self.worker_thread.finished.connect(self.worker_thread.deleteLater)
+
+        self.worker_thread.start()
+
+    def update_plot(self, time_vals, buffer, peaks_y, u_ratio, peak_count, is_discretized):
+        self.signal_curve.setData(time_vals, buffer)
+
+        # Find x-locations of peaks for plot
+        peak_indices = np.isin(buffer, peaks_y)
+        peak_times = time_vals[peak_indices]
+        self.peaks_scatter.setData(peak_times, peaks_y)
+
+        title_text = (
+            f"<span style='font-size:8pt; color:{'red' if is_discretized else 'white'};'>"
+            f"Real-Time Signal | Unique Ratio: {u_ratio:.4f} | "
+            f"Peaks: {peak_count} | Status: {'DISCRETIZED!' if is_discretized else 'Continuous'}"
+            f"</span>"
+        )
+        self.plot.setTitle(title_text, color='r' if is_discretized else 'w')
 
     def machine(self, name):
         path = f'/home/mahdi/Documents/sensor/ux/first_page/history_page/day_details/images/{name}.png'
@@ -305,49 +423,38 @@ class MakePlan(QWidget):
         self.back_btn.setIcon(
             QIcon('/home/mahdi/Documents/sensor/ux/first_page/images/back2.png'))
 
+        self.start_worker()
+
     def handle_back(self):
         self.progress_bar.hide()
         self.status_label.hide()
         self.disc_btn.hide()
 
-        try:
-            if self.device_worker:
-                self.device_worker.stop()
-        except:
-            pass
+        for attr_name in ['device_worker', 'scanner_worker', 'worker']:
+            worker = getattr(self, attr_name, None)
+            if worker is not None:
+                try:
+                    worker.stop()
+                except Exception as e:
+                    print(f"Failed to stop {attr_name}: {e}")
 
-        try:
-            if self.scanner_worker:
-                self.scanner_worker.stop()
-        except:
-            pass
+        # Quit and wait for all threads
+        for thread_name in ['device_thread', 'scanner_thread', 'dis_thread']:
+            thread = getattr(self, thread_name, None)
+            if thread is not None:
+                try:
+                    thread.quit()
+                    thread.wait()
+                except Exception as e:
+                    print(f"Failed to quit {thread_name}: {e}")
 
-        try:
-            if self.worker:
-                self.worker.stop()
-        except:
-            pass
+        if hasattr(self, 'analyse_worker') and self.analyse_worker:
+            self.analyse_worker.stop()
 
-        try:
-            if self.device_thread:
-                self.device_thread.quit()
-                self.device_thread.wait()
-        except:
-            pass
+        if hasattr(self, 'worker_thread') and self.worker_thread:
+            self.worker_thread.quit()
+            self.worker_thread.wait()
 
-        try:
-            if self.scanner_thread:
-                self.scanner_thread.quit()
-                self.scanner_thread.wait()
-        except:
-            pass
-
-        try:
-            if self.dis_thread:
-                self.dis_thread.quit()
-                self.dis_thread.wait()
-        except:
-            pass
         self.exit_requested.emit()
 
     def disc(self):
