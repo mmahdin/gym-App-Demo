@@ -1,12 +1,5 @@
-from PySide6.QtCore import QSettings
+W = 480
+H = 780
 
-
-class AppSettings:
-    def __init__(self):
-        self.settings = QSettings("MyCompany", "MyApp")
-
-    def save_window_state(self, state):
-        self.settings.setValue("window_state", state)
-
-    def load_window_state(self):
-        return self.settings.value("window_state")
+W_RATIO = W / 480
+H_RATIO = H / 780

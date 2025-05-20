@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QLabel
-from PySide6.QtGui import QBrush, QMouseEvent, QPainter, QColor, QPen, QPolygon
+from PySide6.QtGui import QBrush, QMouseEvent, QPainter, QColor, QPen, QPolygon, QPolygonF
 from PySide6.QtCore import QPoint, QRect, Qt
 from first_page.regions_list import *
 from first_page.muscle_history.muscle_history import MuscleHistory
@@ -24,6 +24,7 @@ class ClickableRegions(QLabel):
 
     def mousePressEvent(self, event):
         click_pos = event.pos()
+        print(click_pos)
         if self.face == 1:
             polygons = self.click_regions1.items()
         else:
@@ -58,12 +59,12 @@ class ClickableRegions(QLabel):
         super().paintEvent(event)
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
-        if self.face == 1:
-            polygons = self.click_regions1.items()
-        else:
-            polygons = self.click_regions2.items()
+
+        polygons = self.click_regions1.items(
+        ) if self.face == 1 else self.click_regions2.items()
+
         for name, polygon in polygons:
-            qpoly = QPolygon(polygon)
+            qpoly = QPolygonF(polygon)  # assuming polygon is a list of QPointF
             painter.setPen(QPen(QColor(255, 0, 100), 1))
             painter.setBrush(QBrush(QColor(255, 0, 0, 100)))
             painter.drawPolygon(qpoly)

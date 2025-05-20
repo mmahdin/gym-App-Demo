@@ -3,6 +3,7 @@ from PySide6.QtCore import QPoint
 from .regions import ClickableRegions
 from PySide6.QtCore import Qt
 from pathlib import Path
+from app_settings import *
 
 # Get the directory of the current script
 BASE_DIR = Path(__file__).resolve().parent
@@ -14,9 +15,10 @@ class FirstPageController:
         self.img1 = str(BASE_DIR / "images/f.png")
         self.img2 = str(BASE_DIR / "images/b.png")
         self.pixmap1 = QPixmap(self.img1).scaledToWidth(
-            340, Qt.SmoothTransformation)
+            int(W_RATIO*340), Qt.SmoothTransformation)
         self.pixmap2 = QPixmap(self.img2).scaledToWidth(
-            340, Qt.SmoothTransformation)
+            int(W_RATIO*340), Qt.SmoothTransformation)
+
         self.show_img1 = True
 
     def toggle_image(self):

@@ -194,7 +194,7 @@ class DataAnalyzerWorker(QObject):
         self.fs = fs
         self.step_sec = step_sec
         self.duration_sec = duration_sec
-        self.step_size = int(fs * step_sec)
+        self.step_size = 5
         self.window_size = int(fs * duration_sec)
         self.queue = queue_ref
         self.running = True
@@ -205,13 +205,13 @@ class DataAnalyzerWorker(QObject):
         self.total_time = 0
         self.peak_count = 0
         self.discretization_threshold = 0.5
+        self.prev_len = 0
 
     def process(self):
         while self.running:
             if len(self.queue) < self.step_size:
-                QThread.msleep(int(self.step_sec * 10))  # Avoid busy wait
+                QThread.msleep(int(self.step_sec))  # Avoid busy wait
                 continue
-            print(self.queue[-1])
             new_data = np.array([self.queue.popleft()
                                 for _ in range(self.step_size)])
 
@@ -220,11 +220,19 @@ class DataAnalyzerWorker(QObject):
             self.time_vals += self.step_size * self.timestep
             self.total_time += self.step_size * self.timestep
 
-            # Peak detection
+            # Peak detection for counting
+            peaks, _ = find_peaks(new_data, prominence=0.5,
+                                  distance=self.fs // 10)
+            # Update peak count
+            self.peak_count += len(peaks)
+
+            # Peak detection for illustartion
             peaks, _ = find_peaks(
                 self.buffer, prominence=0.5, distance=self.fs // 10)
             peaks_y = self.buffer[peaks]
-            self.peak_count += len(peaks)
+            # if self.prev_len < len(peaks_y):
+            #     self.peak_count += 1
+            #     self.prev_len = len(peaks_y)
 
             u_ratio = self.unique_ratio(new_data)
             is_discretized = u_ratio < self.discretization_threshold
@@ -238,10 +246,10 @@ class DataAnalyzerWorker(QObject):
                 is_discretized
             )
 
-            QThread.msleep(int(self.step_sec * 20))
+            QThread.msleep(int(self.step_sec))
 
-    def unique_ratio(self, signal):
-        return len(np.unique(np.round(signal, 6))) / len(signal)
+    def unique_ratio(self, signal, precision=0):
+        return len(np.unique(np.round(signal, precision))) / len(signal)
 
     def stop(self):
         self.running = False
@@ -337,7 +345,6 @@ class MakePlan(QWidget):
 
     def update_plot(self, time_vals, buffer, peaks_y, u_ratio, peak_count, is_discretized):
         self.signal_curve.setData(time_vals, buffer)
-
         # Find x-locations of peaks for plot
         peak_indices = np.isin(buffer, peaks_y)
         peak_times = time_vals[peak_indices]

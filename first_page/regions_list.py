@@ -1,4 +1,7 @@
 from PySide6.QtCore import QPoint
+from PySide6.QtCore import QPointF
+from app_settings import *
+
 
 region1 = [
     QPoint(171, 137), QPoint(169, 140), QPoint(
@@ -48,5 +51,9 @@ region1 = [
     QPoint(175, 143), QPoint(174, 141), QPoint(172, 138)
 ]
 
+region1 = [QPointF(p.x() * W_RATIO, p.y() * H_RATIO) for p in region1]
 
-region2 = [QPoint(171, 137)]
+region2 = [QPoint(172, 47), QPoint(212, 199),
+           QPoint(171, 267), QPoint(132, 196)]
+
+region2 = [QPointF(p.x() * W_RATIO, p.y() * H_RATIO) for p in region2]

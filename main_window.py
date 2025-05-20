@@ -1,12 +1,13 @@
 from PySide6.QtWidgets import QMainWindow, QStackedWidget
 from first_page.view import FirstPageView
+from app_settings import *
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("My Mobile App")
-        self.setFixedSize(480, 780)  # Mobile-like size
+        self.setFixedSize(W, H)  # Mobile-like size
 
         apply_gym_theme(self)
 

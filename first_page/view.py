@@ -6,6 +6,7 @@ from PySide6.QtGui import QIcon
 from PySide6.QtCore import QSize
 from first_page.history_page.history_window import HistoryPage
 from first_page.plan_page.plan_window import PlanePage
+from app_settings import *
 
 from pathlib import Path
 
@@ -31,28 +32,30 @@ class FirstPageView(QWidget):
         self.image_label.setPixmap(self.controller.pixmap1)
         self.image_label.mother = self
         self.image_label.setParent(self)
-        self.image_label.move(70, 30)
+        self.image_label.move(int(70*W_RATIO), int(30*H_RATIO))
+        # self.image_label.resize(int(480*W_RATIO), int(640*H_RATIO))
+        print(self.image_label.size())
 
         # Special button setup
         self.change_btn = QPushButton(self)
         self.change_btn.setIcon(
             QIcon(str(BASE_DIR / 'images/rotp.png')))
         self.change_btn.setStyleSheet(change_btn)
-        self.change_btn.move(10, 450)
+        self.change_btn.move(int(10*W_RATIO), int(450*H_RATIO))
         self.change_btn.clicked.connect(self.toggle_image)
 
         self.hist_btn = QPushButton(self)
         self.hist_btn.setIcon(
             QIcon(str(BASE_DIR / 'images/hist.png')))
         self.hist_btn.setStyleSheet(hist_btn)
-        self.hist_btn.move(140, 680)
+        self.hist_btn.move(int(140*W_RATIO), int(680*H_RATIO))
         self.hist_btn.clicked.connect(self.show_history_page)
 
         self.plan_btn = QPushButton(self)
         self.plan_btn.setIcon(
             QIcon(str(BASE_DIR / 'images/plan.png')))
         self.plan_btn.setStyleSheet(plan_btn)
-        self.plan_btn.move(250, 680)
+        self.plan_btn.move(int(250*W_RATIO), int(680*H_RATIO))
         self.plan_btn.clicked.connect(self.show_plan_page)
 
         self.btn3 = QPushButton("Workout Plan")
@@ -93,7 +96,7 @@ change_btn = f"""
                 border: none;
                 background-color: transparent;
                 icon: url(first_page/images/rotp.png);
-                icon-size: 50px 50px;
+                icon-size: {int(50*W_RATIO)}px {int(50*H_RATIO)}px;
             }}
             QPushButton:pressed {{
                 icon: url({(BASE_DIR / 'images/rotpc2.png').resolve().as_posix()});
@@ -105,7 +108,7 @@ plan_btn = f"""
                 border: none;
                 background-color: transparent;
                 icon: url(first_page/images/hist.png);
-                icon-size: 90px 130px;
+                icon-size: {int(90*W_RATIO)}px {int(130*H_RATIO)}px;
             }}
             QPushButton:pressed {{
                 icon: url({(BASE_DIR / 'images/histc.png').resolve().as_posix()});
@@ -117,7 +120,7 @@ hist_btn = f"""
                 border: none;
                 background-color: transparent;
                 icon: url(first_page/images/date.png);
-                icon-size: 90px 130px;
+                icon-size: {int(90*W_RATIO)}px {int(130*H_RATIO)}px;
             }}
             QPushButton:pressed {{
                 icon: url({(BASE_DIR / 'images/datep.png').resolve().as_posix()});
