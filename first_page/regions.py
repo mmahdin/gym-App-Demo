@@ -1,8 +1,12 @@
 from PySide6.QtWidgets import QLabel
-from PySide6.QtGui import QBrush, QMouseEvent, QPainter, QColor, QPen, QPolygon, QPolygonF
+from PySide6.QtGui import QBrush, QMouseEvent, QPainter, QColor, QPen, QPolygon, QPolygonF, QImage
 from PySide6.QtCore import QPoint, QRect, Qt
 from first_page.regions_list import *
 from first_page.muscle_history.muscle_history import MuscleHistory
+from pathlib import Path
+from app_settings import *
+# Get the directory of the current script
+BASE_DIR = Path(__file__).resolve().parent
 
 
 class ClickableRegions(QLabel):
@@ -26,6 +30,9 @@ class ClickableRegions(QLabel):
         click_pos = event.pos()
         print(click_pos)
         if self.face == 1:
+            mask = QImage(str(BASE_DIR / "images/fmask.png")
+                          ).scaledToWidth(int(W_RATIO*340), Qt.SmoothTransformation)
+            # print(mask.pixel(click_pos))
             polygons = self.click_regions1.items()
         else:
             polygons = self.click_regions2.items()
