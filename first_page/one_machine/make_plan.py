@@ -194,7 +194,7 @@ class DataAnalyzerWorker(QObject):
         self.fs = fs
         self.step_sec = step_sec
         self.duration_sec = duration_sec
-        self.step_size = 5
+        self.step_size = int(fs * step_sec)
         self.window_size = int(fs * duration_sec)
         self.queue = queue_ref
         self.running = True
@@ -224,17 +224,20 @@ class DataAnalyzerWorker(QObject):
             peaks, _ = find_peaks(new_data, prominence=0.5,
                                   distance=self.fs // 10)
             # Update peak count
-            self.peak_count += len(peaks)
+            # self.peak_count += len(peaks)
 
             # Peak detection for illustartion
             peaks, _ = find_peaks(
                 self.buffer, prominence=0.5, distance=self.fs // 10)
-            peaks_y = self.buffer[peaks]
-            # if self.prev_len < len(peaks_y):
-            #     self.peak_count += 1
-            #     self.prev_len = len(peaks_y)
 
-            u_ratio = self.unique_ratio(new_data)
+            peaks_y = self.buffer[peaks]
+            if self.prev_len < len(peaks_y):
+                self.peak_count += 1
+                self.prev_len = len(peaks_y)
+            try:
+                u_ratio = self.unique_ratio(self.buffer[-20:])
+            except:
+                u_ratio = 0
             is_discretized = u_ratio < self.discretization_threshold
 
             self.data_ready.emit(
@@ -246,9 +249,10 @@ class DataAnalyzerWorker(QObject):
                 is_discretized
             )
 
-            QThread.msleep(int(self.step_sec))
+            QThread.msleep(int(self.step_sec)*20)
 
     def unique_ratio(self, signal, precision=0):
+        print(np.unique(np.round(signal, precision)))
         return len(np.unique(np.round(signal, precision))) / len(signal)
 
     def stop(self):
@@ -348,8 +352,10 @@ class MakePlan(QWidget):
         # Find x-locations of peaks for plot
         peak_indices = np.isin(buffer, peaks_y)
         peak_times = time_vals[peak_indices]
+        # try:
         self.peaks_scatter.setData(peak_times, peaks_y)
-
+        # except:
+        #     pass
         title_text = (
             f"<span style='font-size:8pt; color:{'red' if is_discretized else 'white'};'>"
             f"Real-Time Signal | Unique Ratio: {u_ratio:.4f} | "
