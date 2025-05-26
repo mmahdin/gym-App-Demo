@@ -221,14 +221,18 @@ class DataAnalyzerWorker(QObject):
             self.total_time += self.step_size * self.timestep
 
             # Peak detection for counting
-            peaks, _ = find_peaks(new_data, prominence=0.5,
-                                  distance=self.fs // 10)
+            # peaks, _ = find_peaks(new_data, prominence=0.5,
+            #                       distance=self.fs // 10)
             # Update peak count
             # self.peak_count += len(peaks)
 
             # Peak detection for illustartion
+            recent_data = self.buffer[-20:]
+            prominence = (np.max(recent_data) - np.min(recent_data)) * 0.3
+            prominence = max(prominence, 1)
+            # if prominence < 1:
             peaks, _ = find_peaks(
-                self.buffer, prominence=0.5, distance=self.fs // 10)
+                self.buffer, prominence=prominence, distance=self.fs // 10)
             peaks_y = self.buffer[peaks]
             if self.prev_len < len(peaks_y):
                 self.peak_count += 1
