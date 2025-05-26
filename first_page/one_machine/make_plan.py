@@ -1,3 +1,4 @@
+import time
 import sys
 from PySide6.QtCore import QObject, Signal, QThread
 from pyqtgraph import PlotWidget, GraphicsLayoutWidget, plot
@@ -185,85 +186,177 @@ class DeviceConnectionWorker(QObject):
 
 
 class DataAnalyzerWorker(QObject):
-    # (time_vals, buffer, peaks_y, u_ratio, peak_count, is_discretized)
-    data_ready = Signal(np.ndarray, np.ndarray, np.ndarray, float, int, bool)
+    # Emits:
+    #   time_vals:       np.ndarray of length window_size (shifted window, from –duration to 0)
+    #   buffer:          np.ndarray of length window_size (the latest signal chunk)
+    #   peak_indices:    np.ndarray of integer indices (all peaks in the buffer)
+    #   peaks_y:         np.ndarray of float amplitudes at those indices
+    #   u_ratio:         float (unique‐ratio on last few samples)
+    #   peak_count:      int (total peaks detected so far, cumulative)
+    #   is_discretized:  bool
+    data_ready = Signal(
+        np.ndarray,  # time_vals
+        np.ndarray,  # buffer
+        np.ndarray,  # peak_indices
+        np.ndarray,  # peaks_y
+        float,       # unique_ratio
+        int,         # peak_count
+        bool         # is_discretized
+    )
     finished = Signal()
 
-    def __init__(self, fs, step_sec, duration_sec, queue_ref):
+    def __init__(self, fs: float, step_sec: float, duration_sec: float, queue_ref):
+        """
+        fs            : sampling frequency (Hz)
+        step_sec      : how many seconds-worth of samples to read per iteration
+        duration_sec  : length of the sliding window in seconds
+        queue_ref     : a deque or similar supporting popleft()
+        """
         super().__init__()
+
         self.fs = fs
-        self.step_sec = step_sec
+        # Compute how many samples correspond to step_sec; at least 1 sample
+        self.step_size = max(1, int(np.round(fs * step_sec)))
         self.duration_sec = duration_sec
-        self.step_size = 1
-        self.window_size = int(fs * duration_sec)
+        self.window_size = int(np.round(fs * duration_sec))
         self.queue = queue_ref
+
+        # Pre‐allocate circular buffer of length window_size
+        self.buffer = np.zeros(self.window_size, dtype=float)
+
+        # time_vals runs from –duration_sec .. 0, then is shifted forward each iteration
+        self.time_vals = np.linspace(-duration_sec,
+                                     0.0, self.window_size, dtype=float)
+
+        # time increment per sample
+        self.timestep = 1.0 / fs
+
+        # Total number of samples processed so far (absolute index)
+        self.sample_counter = 0
+
+        # The absolute index (sample number) of the last peak we counted
+        self.last_peak_index = -1
+
+        # Cumulative count of peaks detected
+        self.peak_count = 0
+
+        # A small buffer‐based threshold for deciding “discretized” vs “continuous”
+        self.discretization_threshold = 0.5
+
         self.running = True
 
-        self.buffer = np.zeros(self.window_size)
-        self.time_vals = np.linspace(-self.duration_sec, 0, self.window_size)
-        self.timestep = 1 / fs
-        self.total_time = 0
-        self.peak_count = 0
-        self.discretization_threshold = 0.5
-        self.prev_len = 0
-
     def process(self):
+        """
+        Main loop: each iteration, attempt to read self.step_size samples from queue.
+        If not enough samples yet, sleep for step_sec (ms) and retry.
+        Otherwise, shift the circular buffer, append new_data, run peak‐detection,
+        update counts, compute unique_ratio, emit data_ready, then sleep.
+        """
+        # How long to sleep each iteration (in ms)
+        sleep_ms = int(self.step_size / self.fs * 1000)
+
         while self.running:
+            # Wait until at least step_size samples are available
             if len(self.queue) < self.step_size:
-                QThread.msleep(int(self.step_sec))  # Avoid busy wait
+                QThread.msleep(sleep_ms)
                 continue
-            new_data = np.array([self.queue.popleft()
-                                for _ in range(self.step_size)])
 
+            # Pop exactly step_size samples from the queue
+            new_block = np.fromiter(
+                (self.queue.popleft() for _ in range(self.step_size)),
+                dtype=float,
+                count=self.step_size
+            )
+
+            # Shift buffer left, discard the oldest step_size samples
             self.buffer[:-self.step_size] = self.buffer[self.step_size:]
-            self.buffer[-self.step_size:] = new_data
-            self.time_vals += self.step_size * self.timestep
-            self.total_time += self.step_size * self.timestep
+            # Append new_block at the end
+            self.buffer[-self.step_size:] = new_block
 
-            # Peak detection for counting
-            # peaks, _ = find_peaks(new_data, prominence=0.5,
-            #                       distance=self.fs // 10)
-            # Update peak count
-            # self.peak_count += len(peaks)
+            # Advance time_vals by step_size * timestep
+            shift_amount = self.step_size * self.timestep
+            self.time_vals[:] = self.time_vals + shift_amount
 
-            # Peak detection for illustartion
-            recent_data = self.buffer[-20:]
-            prominence = (np.max(recent_data) - np.min(recent_data)) * 0.3
-            prominence = max(prominence, 1)
-            # if prominence < 1:
+            # Update the absolute sample counter
+            self.sample_counter += self.step_size
+
+            # ----- PEAK DETECTION (on the entire buffer) -----
+            #
+            # We compute a dynamic prominence based on the latest 1‐second window (or at least 20 samples):
+            # 1 second or whole window
+            lookback_n = min(self.window_size, int(self.fs * 1.0))
+            recent_segment = self.buffer[-lookback_n:]
+            dynamic_prom = (np.max(recent_segment) -
+                            np.min(recent_segment)) * 0.3
+            dynamic_prom = max(dynamic_prom, 1.0)
+
+            # Find all peaks in the full buffer
             peaks, _ = find_peaks(
-                self.buffer, prominence=prominence, distance=self.fs // 10)
-            peaks_y = self.buffer[peaks]
-            if self.prev_len < len(peaks_y):
-                self.peak_count += 1
-                self.prev_len = len(peaks_y)
+                self.buffer,
+                prominence=dynamic_prom,
+                # e.g. enforce at least 0.1 seconds between peaks
+                distance=int(self.fs * 0.1)
+            )
 
-            u_ratio = self.unique_ratio(self.buffer[-5:])
-            is_discretized = u_ratio < self.discretization_threshold
+            # Convert buffer-relative indices to absolute sample indices:
+            #   If buffer index = i, then absolute_index = sample_counter - window_size + i
+            abs_peak_indices = peaks + (self.sample_counter - self.window_size)
 
+            # Only count those peaks that have abs_index > last_peak_index
+            new_peaks_mask = abs_peak_indices > self.last_peak_index
+            if np.any(new_peaks_mask):
+                # Increment peak_count by the number of brand‐new peaks
+                newly_detected = abs_peak_indices[new_peaks_mask]
+                self.peak_count += len(newly_detected)
+                # Update last_peak_index to the maximum of newly counted
+                self.last_peak_index = np.max(newly_detected)
+
+            # We'll emit both the buffer-relative indices and their y-values:
+            peaks_y = self.buffer[peaks]  # amplitude at each peak
+            peak_indices = peaks.copy()
+
+            # ----- DISCRETIZATION CHECK -----
+            # Compute unique_ratio on the last 5 samples of the buffer
+            last_five = self.buffer[-5:]
+            u_ratio = self.unique_ratio(last_five, precision=0)
+            is_discretized = (u_ratio < self.discretization_threshold)
+
+            # Emit everything in one signal
             self.data_ready.emit(
                 self.time_vals.copy(),
                 self.buffer.copy(),
+                peak_indices.astype(np.int64),
                 peaks_y.copy(),
-                u_ratio,
-                self.peak_count,
-                is_discretized
+                float(u_ratio),
+                int(self.peak_count),
+                bool(is_discretized)
             )
 
-            QThread.msleep(int(self.step_sec))
+            # Sleep a bit before next iteration
+            QThread.msleep(sleep_ms)
 
-    def unique_ratio(self, signal, precision=0):
-        return len(np.unique(np.round(signal, precision))) / len(signal)
+        # Once running is set to False, emit finished
+        self.finished.emit()
+
+    def unique_ratio(self, signal: np.ndarray, precision: int = 0) -> float:
+        """
+        Compute the ratio of unique values in 'signal' array,
+        after rounding to the given 'precision' decimals.
+        """
+        rounded = np.round(signal, precision)
+        return float(len(np.unique(rounded)) / len(rounded))
 
     def stop(self):
+        """
+        Ask the worker to stop gracefully.
+        """
         self.running = False
-        self.finished.emit()
 
 
 class MakePlan(QWidget):
     exit_requested = Signal()
-    # mac = "FE:20:38:F5:42:F9"
-    mac = "F6:DC:E6:17:E5:10"
+    mac = "FE:20:38:F5:42:F9"
+    # mac = "F6:DC:E6:17:E5:10"
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -348,22 +441,41 @@ class MakePlan(QWidget):
 
         self.worker_thread.start()
 
-    def update_plot(self, time_vals, buffer, peaks_y, u_ratio, peak_count, is_discretized):
+    def update_plot(self,
+                    time_vals: np.ndarray,
+                    buffer: np.ndarray,
+                    peak_indices: np.ndarray,
+                    peaks_y: np.ndarray,
+                    u_ratio: float,
+                    peak_count: int,
+                    is_discretized: bool):
+        """
+        - time_vals:     array of length window_size → x‐axis
+        - buffer:        array of length window_size → y‐axis
+        - peak_indices:  integer indices in [0 .. window_size-1]
+        - peaks_y:       array of same length as peak_indices
+        - u_ratio:       float
+        - peak_count:    int
+        - is_discretized: bool
+        """
+
+        # Update the main signal curve
         self.signal_curve.setData(time_vals, buffer)
-        # Find x-locations of peaks for plot
-        peak_indices = [np.where(buffer == y)[0][0]
-                        for y in peaks_y if y in buffer]
+
+        # Convert buffer‐indices → time values for scatter‐plot
         peak_times = time_vals[peak_indices]
-        peaks_y = buffer[peak_indices]  # Ensures same shape
         self.peaks_scatter.setData(peak_times, peaks_y)
 
+        # Build title with color depending on discretization
+        color = 'red' if is_discretized else 'white'
+        status_text = 'DISCRETIZED!' if is_discretized else 'Continuous'
         title_text = (
-            f"<span style='font-size:8pt; color:{'red' if is_discretized else 'white'};'>"
-            f"Real-Time Signal | Unique Ratio: {u_ratio:.4f} | "
-            f"Peaks: {peak_count} | Status: {'DISCRETIZED!' if is_discretized else 'Continuous'}"
+            f"<span style='font-size:8pt; color:{color};'>"
+            f"Real‐Time Signal | Unique Ratio: {u_ratio:.4f} | "
+            f"Peaks: {peak_count} | Status: {status_text}"
             f"</span>"
         )
-        self.plot.setTitle(title_text, color='r' if is_discretized else 'w')
+        self.plot.setTitle(title_text, color=color)
 
     def machine(self, name):
         path = str(
